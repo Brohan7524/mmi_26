@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-dotenv
+redis
+asyncpg
+sqlalchemy
+httpx
