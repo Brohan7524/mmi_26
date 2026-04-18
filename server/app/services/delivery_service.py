@@ -6,11 +6,17 @@ async def flush(user_id, zone_type):
 
     parsed = [json.loads(m) for m in messages]
 
+    print("Flushing for:", user_id)
+    print("Messages:", parsed)
+    
     filtered = [
         m for m in parsed
         if zone_type != "critical_only" or m["priority"] == "critical"
     ]
 
+    for msg in filtered:
+        r.zrem(f"queue:{user_id}", json.dumps(msg, sort_keys=True))
+
     print("Delivering:", filtered)
 
-    r.delete(f"queue:{user_id}")
+    return filtered

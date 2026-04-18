@@ -1,23 +1,38 @@
 from fastapi import APIRouter
-from app.services import ai_service, queue_service
+from app.services import geo_service, delivery_service
 
 router = APIRouter()
 
 @router.post("/")
-async def notify(data: dict):
-    recipient_id = data["recipient_id"]
-    content = data["content"]
+async def beacon(data: dict):
+    user_id = data.get("user_id", "unknown")
+    lat = data.get("lat")
+    lng = data.get("lng")
+    connectivity_score = data.get("connectivity_score", 0)
 
-    spam = await ai_service.check_spam(content)
+    if lat is None or lng is None:
+        return {"status": "invalid_location"}
 
-    if spam["is_spam"] and spam["confidence"] > 0.85:
-        return {"status": "dropped_spam"}
+    print(f"[BEACON] User {user_id} at ({lat}, {lng}) with connectivity {connectivity_score}")
 
-    analysis = await ai_service.analyze(content)
+    zone = await geo_service.match(user_id, lat, lng)
+    print("Matched zone:", zone)
 
-    if analysis["should_bypass_deferral"]:
-        return {"status": "sent_immediately"}
+    can_deliver = (
+        connectivity_score >= 2 and
+        zone["type"] != "defer"
+    )
 
-    await queue_service.enqueue(recipient_id, content, analysis)
+    print("Can deliver:", can_deliver)
 
-    return {"status": "queued"}
+    delivered_messages = []
+
+    if can_deliver:
+        delivered_messages = await delivery_service.flush(user_id, zone["type"])
+
+    return {
+        "status": "processed",
+        "zone": zone,
+        "delivered": can_deliver,
+        "messages": delivered_messages
+    }
