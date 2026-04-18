@@ -1,22 +1,18 @@
+# app/api/messages.py
+
 from fastapi import APIRouter
-from sqlalchemy import text
-from app.core.db import engine
+from app.api.notify import DELIVERED_STORE
+from app.services.queue_service import get_queue
 
 router = APIRouter()
 
+
 @router.get("/{user_id}")
 async def get_messages(user_id: str):
-    async with engine.connect() as conn:
-        result = await conn.execute(
-            text("""
-                SELECT content, priority, category, created_at
-                FROM messages
-                WHERE user_id = :uid
-                ORDER BY created_at DESC
-            """),
-            {"uid": user_id}
-        )
+    delivered = DELIVERED_STORE.get(user_id, [])
+    queue = await get_queue(user_id)
 
-        messages = result.mappings().all()
-
-    return {"messages": messages}
+    return {
+        "delivered": delivered[::-1],
+        "pending": queue[::-1]
+    }

@@ -1,6 +1,5 @@
-from app.core.redis import r
-import json
 import time
+from app.services.queue_service import get_queue, clear_queue
 
 DIGEST_THRESHOLD = 3
 
@@ -32,51 +31,46 @@ def _build_digest(messages):
 
 
 async def flush(user_id: str, zone_type: str) -> list:
-    raw_messages = await r.zrange(f"queue:{user_id}", 0, -1)
+    queue = await get_queue(user_id)
 
-    parsed = []
-    expired = []
     now = int(time.time())
 
-    for raw in raw_messages:
-        try:
-            m = json.loads(raw)
-            enqueued_at = m.get("enqueued_at", now)
-            ttl = m.get("ttl", 86400)
+    valid_messages = []
+    expired_count = 0
 
-            if now - enqueued_at > ttl:
-                expired.append(raw)
-            else:
-                parsed.append((raw, m))
-        except Exception:
-            expired.append(raw)
+    for m in queue:
+        enqueued_at = m.get("enqueued_at", now)
+        ttl = m.get("ttl", 86400)
 
-    # Remove expired
-    for raw in expired:
-        await r.zrem(f"queue:{user_id}", raw)
+        if now - enqueued_at > ttl:
+            expired_count += 1
+        else:
+            valid_messages.append(m)
 
-    if expired:
-        print(f"[DELIVERY] Expired {len(expired)} message(s)")
+    if expired_count:
+        print(f"[DELIVERY] Expired {expired_count} message(s)")
 
-    # Filter based on zone
     to_deliver = []
     to_keep = []
 
-    for raw, m in parsed:
+    for m in valid_messages:
         if zone_type == "critical_only" and m.get("priority") != "critical":
-            to_keep.append(raw)
+            to_keep.append(m)
         else:
-            to_deliver.append((raw, m))
+            to_deliver.append(m)
 
-    # Remove delivered from queue
-    for raw, _ in to_deliver:
-        await r.zrem(f"queue:{user_id}", raw)
+    remaining_queue = to_keep
+    await clear_queue(user_id)
+    for m in remaining_queue:
+        queue.append(m)
 
-    delivered = [m for _, m in to_deliver]
+    delivered = to_deliver
 
     if len(delivered) > DIGEST_THRESHOLD:
-        # sort by priority
-        delivered.sort(key=lambda x: PRIORITY_ORDER.get(x["priority"], 1), reverse=True)
+        delivered.sort(
+            key=lambda x: PRIORITY_ORDER.get(x.get("priority", "low"), 1),
+            reverse=True
+        )
 
         top_messages = delivered[:2]
         remaining = delivered[2:]

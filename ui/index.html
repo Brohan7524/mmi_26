@@ -1,370 +1,397 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrueNotify — Geo-Deferred Notifications</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrueNotify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav class="sidebar">
-  <div class="logo">
-    <div class="logo-mark">True<span>Notify</span></div>
-    <div class="logo-sub">Geo-Deferred · v0.1</div>
-  </div>
-  <div class="nav-sec">Core</div>
-  <div class="nav-item active" onclick="showPage('dashboard',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-    Dashboard
-  </div>
-  <div class="nav-item" onclick="showPage('inbox',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
-    Inbox
-    <span class="nbadge" id="nav-qc">0</span>
-  </div>
-  <div class="nav-item" onclick="showPage('drive',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><path d="M2.5 12H1V7l3-4h7l2 4v1M5.5 12h5"/><path d="M10 3v4H1"/></svg>
-    Drive Sim
-    <span class="nbadge amber">HOT</span>
-  </div>
-  <div class="nav-sec">Tools</div>
-  <div class="nav-item" onclick="showPage('notify',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2L2 7l4 2 2 5 6-12z"/></svg>
-    Send Notify
-  </div>
-  <div class="nav-item" onclick="showPage('beacon',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
-    Beacon
-  </div>
-  <div class="nav-item" onclick="showPage('geo',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2C5.8 2 4 3.8 4 6c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z"/><circle cx="8" cy="6" r="1.5"/></svg>
-    Geo Zones
-  </div>
-  <div class="nav-item" onclick="showPage('logic',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v14M1 5h14M1 11h14"/></svg>
-    Logic Diagram
-  </div>
-  <div class="nav-item" onclick="showPage('settings',this)">
-    <svg class="ni" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/></svg>
-    Settings
-  </div>
-  <div class="sb">
-    <div class="uchip">
-      <div class="av">U1</div>
-      <div><div class="uname">user_123</div><div class="uid" id="api-disp">localhost:8000</div></div>
+
+<!-- FLOATING PILL NAV -->
+<nav id="pill-nav">
+  <div class="pn-logo">True<span>Notify</span></div>
+    <div class="pn-item active" data-label="Dashboard" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="1" width="6" height="6" rx="1"/>
+        <rect x="9" y="1" width="6" height="6" rx="1"/>
+        <rect x="1" y="9" width="6" height="6" rx="1"/>
+        <rect x="9" y="9" width="6" height="6" rx="1"/>
+      </svg>
     </div>
+
+    <div class="pn-item" data-label="Inbox" onclick="showPage('inbox',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 4h12M2 8h12M2 12h8"/>
+      </svg>
+      <span class="pn-badge" id="nav-qc">0</span>
+    </div>
+
+    <div class="pn-item" data-label="Drive Simulator" onclick="showPage('drive',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="4" cy="12" r="1.5"/>
+        <circle cx="12" cy="12" r="1.5"/>
+        <path d="M2.5 12H1V7l3-4h7l2 4v1M5.5 12h5"/>
+      </svg>
+    </div>
+
+    <div class="pn-item" data-label="Send Notification" onclick="showPage('notify',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14 2L2 7l4 2 2 5 6-12z"/>
+      </svg>
+    </div>
+
+    <div class="pn-item" data-label="Beacon" onclick="showPage('beacon',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="3"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2"/>
+      </svg>
+    </div>
+
+    <div class="pn-item" data-label="Geo Zones" onclick="showPage('geo',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 2C5.8 2 4 3.8 4 6c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z"/>
+        <circle cx="8" cy="6" r="1.5"/>
+      </svg>
+    </div>
+
+    <div class="pn-item" data-label="Logic" onclick="showPage('logic',this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 8h12M8 2v12"/>
+      </svg>
+    </div>
+
+    <div class="pn-item" data-label="Settings" onclick="showPage('settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M19.4 15a7.97 7.97 0 0 0 .1-2l2-1.5-2-3.5-2.3 1a8 8 0 0 0-1.7-1l-.3-2.5h-4l-.3 2.5a8 8 0 0 0-1.7 1l-2.3-1-2 3.5 2 1.5a8 8 0 0 0 0 2l-2 1.5 2 3.5 2.3-1a8 8 0 0 0 1.7 1l.3 2.5h4l.3-2.5a8 8 0 0 0 1.7-1l2.3 1 2-3.5-2-1.5z"/>
+      </svg>
+    </div>
+  <div class="pn-right">
+    <div class="pn-dot"></div>
+    <span id="api-disp">localhost:8000</span>
   </div>
 </nav>
 
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="page-title">Dashboard</div>
-    <div id="tbar-zone" style="display:none;"></div>
-    <div class="spill"><div class="dot"></div><span>server online</span></div>
-  </div>
-  <div class="content">
 
-  <!-- DASHBOARD -->
-  <div class="page active" id="page-dashboard">
-    <div class="sgrid">
-      <div class="sc purple"><div class="slbl">Pending</div><div class="sval" id="s-p">0</div><div class="ssub">queued</div></div>
-      <div class="sc green"><div class="slbl">Delivered</div><div class="sval" id="s-d">0</div><div class="ssub">this session</div></div>
-      <div class="sc amber"><div class="slbl">Deferred</div><div class="sval" id="s-df">0</div><div class="ssub">held for zone</div></div>
-      <div class="sc red"><div class="slbl">Bypassed</div><div class="sval" id="s-b">0</div><div class="ssub">OTP / critical</div></div>
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub">Session overview — geo-deferred notification pipeline</div>
+  <div class="sgrid">
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Pending</span><div class="sc-icon amber">⏸</div></div>
+      <div class="sc-val" id="s-p">0</div><div class="sc-sub">queued in Redis</div>
     </div>
-    <div class="sh"><div class="st">Recent Activity</div><div class="sl"></div></div>
-    <div class="qlist" id="dash-act">
-      <div class="empty"><div class="empty-icon">◎</div><div class="empty-title">No activity yet</div><div class="empty-sub">Send a notification or run the Drive Simulator</div></div>
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Delivered</span><div class="sc-icon green">✓</div></div>
+      <div class="sc-val" id="s-d">0</div><div class="sc-sub">this session</div>
     </div>
-  </div>
-
-  <!-- INBOX -->
-  <div class="page" id="page-inbox">
-    <div class="tab-row">
-      <div class="tab active" id="tab-p" onclick="switchTab('p')">Pending <span class="tc-n tc-p" id="tcc-p">0</span></div>
-      <div class="tab" id="tab-d" onclick="switchTab('d')">Delivered <span class="tc-n tc-d" id="tcc-d">0</span></div>
-      <div class="tab" id="tab-b" onclick="switchTab('b')">Bypassed <span class="tc-n tc-b" id="tcc-b">0</span></div>
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Deferred</span><div class="sc-icon blue">◌</div></div>
+      <div class="sc-val" id="s-df">0</div><div class="sc-sub">held for zone</div>
     </div>
-    <div style="display:flex;gap:10px;margin-bottom:16px;">
-      <button class="btn btns" onclick="renderInbox()">↻ Refresh</button>
-      <button class="btn btnd" style="margin-left:auto;" onclick="clearInbox()">⌫ Clear All</button>
-    </div>
-    <div id="inbox-c" class="qlist"></div>
-  </div>
-
-  <!-- DRIVE -->
-  <div class="page" id="page-drive">
-    <div class="dstats">
-      <div class="dsc"><div class="dsv a" id="dr-p">0</div><div class="dsl">Pending</div></div>
-      <div class="dsc"><div class="dsv g" id="dr-d">0</div><div class="dsl">Delivered</div></div>
-      <div class="dsc"><div class="dsv r" id="dr-b">0</div><div class="dsl">Bypassed</div></div>
-      <div class="dsc"><div class="dsv b" id="dr-z">—</div><div class="dsl">Zone</div></div>
-    </div>
-    <div class="drive-layout">
-      <div>
-        <div class="route-box">
-          <div class="rth">
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:600;">Route Simulation</div>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div class="cleg-row">
-                <div class="cleg"><div class="cleg-d" style="background:var(--green)"></div>Good</div>
-                <div class="cleg"><div class="cleg-d" style="background:var(--amber)"></div>Weak</div>
-                <div class="cleg"><div class="cleg-d" style="background:var(--red)"></div>Dead</div>
-              </div>
-              <div class="sig" id="sig"><div class="sigb" id="sb0"></div><div class="sigb" id="sb1"></div><div class="sigb" id="sb2"></div><div class="sigb" id="sb3"></div></div>
-              <span id="sig-lbl" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">4G</span>
-            </div>
-          </div>
-          <div class="route-track" id="rt">
-            <div class="tsegs" id="tsegs"></div>
-            <div class="car" id="dr-car" style="left:30px;transform:scaleX(-1);">🚗</div>
-          </div>
-          <div class="wps" id="wps"></div>
-          <div class="nrain" id="nrain"><div class="nrl">notification stream</div></div>
-          <div class="dctl">
-            <button class="btn btnp" id="dr-btn" onclick="toggleDrive()" style="flex:1;">▶ Start Drive</button>
-            <button class="btn btns" onclick="resetDrive()">↺ Reset</button>
-            <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;">
-              Speed <input type="range" min="1" max="5" value="3" id="dr-spd" style="width:70px;" oninput="document.getElementById('spd-lbl').textContent=this.value+'×'">
-              <span id="spd-lbl">3×</span>
-            </div>
-          </div>
-          <div class="status-msg" id="dr-msg">Press Start to begin. Notifications queue in low-signal zones and flush when signal returns.</div>
-        </div>
-        <div style="margin-top:14px;">
-          <div class="sh"><div class="st">Event Log</div><div class="sl"></div><button class="btn btns" style="padding:3px 8px;font-size:11px;" onclick="clearLog()">clear</button></div>
-          <div class="log" id="logstream"><div class="le"><span class="lt">00:00</span><span class="linfo">TrueNotify Drive Simulator ready</span></div></div>
-        </div>
-      </div>
-      <div class="dqpanel">
-        <div class="dqs">
-          <div class="dqh"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v5l3 3"/><circle cx="8" cy="8" r="6"/></svg>Pending<span class="dqcnt" id="dqpc" style="color:var(--amber);">0</span></div>
-          <div class="dql" id="dqpl"><div style="padding:10px;text-align:center;font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;">queue empty</div></div>
-        </div>
-        <div class="dqs">
-          <div class="dqh"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-8"/></svg>Delivered<span class="dqcnt" id="dqdc" style="color:var(--green);">0</span></div>
-          <div class="dql" id="dqdl"><div style="padding:10px;text-align:center;font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;">none yet</div></div>
-        </div>
-        <div class="dqs">
-          <div class="dqh"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v5M8 12v1"/><circle cx="8" cy="8" r="6"/></svg>Critical Bypass<span class="dqcnt" id="dqbc" style="color:var(--red);">0</span></div>
-          <div class="dql" id="dqbl"><div style="padding:10px;text-align:center;font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;">none yet</div></div>
-        </div>
-      </div>
+    <div class="sc">
+      <div class="sc-top"><span class="sc-lbl">Bypassed</span><div class="sc-icon red">⚡</div></div>
+      <div class="sc-val" id="s-b">0</div><div class="sc-sub">OTP / critical</div>
     </div>
   </div>
-
-  <!-- SEND NOTIFY -->
-  <div class="page" id="page-notify">
-    <div class="tc">
-      <div class="panel">
-        <div class="ptitle">POST /api/notify</div>
-        <div class="field"><label>Presets</label>
-          <div class="presets">
-            <button class="pbtn" onclick="setPreset('otp')">OTP</button>
-            <button class="pbtn" onclick="setPreset('payment')">Payment</button>
-            <button class="pbtn" onclick="setPreset('social')">Social</button>
-            <button class="pbtn" onclick="setPreset('spam')">Spam</button>
-            <button class="pbtn" onclick="setPreset('alert')">Alert</button>
-          </div>
-        </div>
-        <div class="field"><label>Recipient ID</label><input type="text" id="n-rcpt" value="user_123"></div>
-        <div class="field"><label>Sender</label><input type="text" id="n-sender" value="app_xyz"></div>
-        <div class="field"><label>Content</label><textarea id="n-content">Your OTP is 4821. Valid for 5 minutes. Do not share.</textarea></div>
-        <button class="btn btnp" onclick="sendNotify()">▶ Send to /api/notify</button>
-      </div>
-      <div class="panel">
-        <div class="ptitle">Response</div>
-        <div id="n-result" class="rbox">waiting...</div>
-        <div style="margin-top:18px;">
-          <div class="ptitle">Analysis</div>
-          <div id="ana-empty" style="font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;">send a message to see analysis</div>
-          <div id="ana-prev" style="display:none;">
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;" id="ana-tags"></div>
-            <div style="background:var(--surface2);border-radius:var(--rs);padding:12px;font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;line-height:1.8;" id="ana-det"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BEACON -->
-  <div class="page" id="page-beacon">
-    <div class="tc">
-      <div class="panel">
-        <div class="ptitle">POST /api/beacon</div>
-        <div class="field"><label>User ID</label><input type="text" id="b-uid" value="user_123"></div>
-        <div class="field"><label>Latitude</label><input type="number" id="b-lat" value="12.9716" step="0.0001"></div>
-        <div class="field"><label>Longitude</label><input type="number" id="b-lng" value="77.5946" step="0.0001"></div>
-        <div class="field">
-          <label>Connectivity — <span id="conn-lbl" style="color:var(--text)">4G/WiFi (3)</span></label>
-          <div class="cbar-wrap"><div class="cbar" id="cb0"></div><div class="cbar" id="cb1"></div><div class="cbar" id="cb2"></div><div class="cbar" id="cb3"></div></div>
-          <input type="range" min="0" max="3" value="3" id="b-conn" oninput="updConn()">
-        </div>
-        <button class="btn btng" onclick="sendBeacon()">◎ Emit Beacon</button>
-        <button class="btn btns" onclick="startTracking()">▶ Start Live Tracking</button>
-        <button class="btn btnd" onclick="stopTracking()">■ Stop Tracking</button>
-        <button class="btn btns" style="width:100%;justify-content:center;margin-top:8px;" onclick="useGPS()">◎ Use current GPS</button>
-      </div>
-      <div class="panel">
-        <div class="ptitle">Response</div>
-        <div id="b-result" class="rbox">waiting...</div>
-        <div id="b-zone" style="margin-top:12px;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GEO ZONES -->
-  <div class="page" id="page-geo">
-    <div class="geo-grid" id="geo-cards"></div>
-    <div class="sh"><div class="st">Add Zone</div><div class="sl"></div></div>
-    <div class="tc">
-      <div class="panel">
-        <div class="field"><label>Label</label><input type="text" id="gl" placeholder="home, office, gym…"></div>
-        <div class="field"><label>Latitude</label><input type="number" id="glat" placeholder="12.9716" step="0.0001"></div>
-        <div class="field"><label>Longitude</label><input type="number" id="glng" placeholder="77.5946" step="0.0001"></div>
-        <div class="field"><label>Radius (m)</label><input type="number" id="gr" value="200"></div>
-        <div class="field"><label>Zone Type</label><select id="gt"><option value="always_deliver">always_deliver</option><option value="defer">defer</option><option value="critical_only">critical_only</option></select></div>
-        <button class="btn btnp" onclick="addGeo()">+ Add Zone</button>
-      </div>
-      <div class="panel" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);line-height:1.9;">
-        <div class="ptitle">Zone Behavior</div>
-        <div style="margin-bottom:10px;"><span class="zbadge za" style="font-size:10px;padding:3px 10px;">always_deliver</span><div style="margin-top:6px;padding-left:4px;">Flush all queued messages immediately when inside.</div></div>
-        <div class="divider"></div>
-        <div style="margin-bottom:10px;"><span class="zbadge zd" style="font-size:10px;padding:3px 10px;">defer</span><div style="margin-top:6px;padding-left:4px;">Hold all messages until zone exits.</div></div>
-        <div class="divider"></div>
-        <div><span class="zbadge zc" style="font-size:10px;padding:3px 10px;">critical_only</span><div style="margin-top:6px;padding-left:4px;">Only OTP / payment / security pass through.</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LOGIC DIAGRAM -->
-  <div class="page" id="page-logic">
-    <div class="sh"><div class="st">Defer / Deliver Decision Logic</div><div class="sl"></div></div>
-    <div class="diag-wrap">
-      <svg viewBox="0 0 740 570" width="740" height="570" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace;">
-        <defs>
-          <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7f7fa0"/></marker>
-          <marker id="ar-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#00d9a3"/></marker>
-          <marker id="ar-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff6b6b"/></marker>
-          <marker id="ar-a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ffa94d"/></marker>
-        </defs>
-        <rect x="270" y="10" width="200" height="42" rx="21" fill="#1a1a26" stroke="#a29bfe" stroke-width="1.5"/>
-        <text x="370" y="27" text-anchor="middle" fill="#a29bfe" font-size="10" font-weight="500">INCOMING MESSAGE</text>
-        <text x="370" y="42" text-anchor="middle" fill="#7f7fa0" font-size="9">POST /api/notify</text>
-        <line x1="370" y1="52" x2="370" y2="86" stroke="#7f7fa0" stroke-width="1" marker-end="url(#ar)"/>
-        <polygon points="370,86 450,116 370,146 290,116" fill="#1a1a26" stroke="#ffa94d" stroke-width="1.5"/>
-        <text x="370" y="112" text-anchor="middle" fill="#ffa94d" font-size="10">Spam?</text>
-        <text x="370" y="126" text-anchor="middle" fill="#7f7fa0" font-size="9">confidence &gt; 0.85</text>
-        <line x1="450" y1="116" x2="570" y2="116" stroke="#ff6b6b" stroke-width="1" marker-end="url(#ar-r)"/>
-        <text x="505" y="108" text-anchor="middle" fill="#ff6b6b" font-size="9">YES</text>
-        <rect x="570" y="96" width="110" height="40" rx="8" fill="#1f0a0a" stroke="#ff6b6b" stroke-width="1.5"/>
-        <text x="625" y="114" text-anchor="middle" fill="#ff6b6b" font-size="10">🚫 DROPPED</text>
-        <text x="625" y="128" text-anchor="middle" fill="#7f7fa0" font-size="9">logged · discarded</text>
-        <line x1="370" y1="146" x2="370" y2="180" stroke="#7f7fa0" stroke-width="1" marker-end="url(#ar)"/>
-        <text x="378" y="167" fill="#7f7fa0" font-size="9">NO</text>
-        <rect x="270" y="180" width="200" height="42" rx="8" fill="#1a1a26" stroke="#a29bfe" stroke-width="1.5"/>
-        <text x="370" y="199" text-anchor="middle" fill="#a29bfe" font-size="10">AI Analysis</text>
-        <text x="370" y="213" text-anchor="middle" fill="#7f7fa0" font-size="9">priority · category · bypass flag</text>
-        <line x1="370" y1="222" x2="370" y2="256" stroke="#7f7fa0" stroke-width="1" marker-end="url(#ar)"/>
-        <polygon points="370,256 450,286 370,316 290,286" fill="#1a1a26" stroke="#ff6b6b" stroke-width="1.5"/>
-        <text x="370" y="282" text-anchor="middle" fill="#ff6b6b" font-size="10">Bypass?</text>
-        <text x="370" y="296" text-anchor="middle" fill="#7f7fa0" font-size="9">OTP / payment / alert</text>
-        <line x1="450" y1="286" x2="570" y2="286" stroke="#ff6b6b" stroke-width="1" marker-end="url(#ar-r)"/>
-        <text x="505" y="278" text-anchor="middle" fill="#ff6b6b" font-size="9">YES</text>
-        <rect x="570" y="266" width="120" height="40" rx="8" fill="#1f0a0a" stroke="#ff6b6b" stroke-width="1.5"/>
-        <text x="630" y="284" text-anchor="middle" fill="#ff6b6b" font-size="10">⚡ SEND NOW</text>
-        <text x="630" y="298" text-anchor="middle" fill="#7f7fa0" font-size="9">skip queue entirely</text>
-        <line x1="370" y1="316" x2="370" y2="350" stroke="#7f7fa0" stroke-width="1" marker-end="url(#ar)"/>
-        <text x="378" y="337" fill="#7f7fa0" font-size="9">NO</text>
-        <rect x="270" y="350" width="200" height="42" rx="8" fill="#1a1a26" stroke="#a29bfe" stroke-width="1.5"/>
-        <text x="370" y="369" text-anchor="middle" fill="#a29bfe" font-size="10">Enqueue + TTL</text>
-        <text x="370" y="383" text-anchor="middle" fill="#7f7fa0" font-size="9">Redis sorted set · weight×1000+ts</text>
-        <line x1="370" y1="392" x2="370" y2="426" stroke="#7f7fa0" stroke-width="1" marker-end="url(#ar)"/>
-        <polygon points="370,426 450,456 370,486 290,456" fill="#1a1a26" stroke="#00d9a3" stroke-width="1.5"/>
-        <text x="370" y="452" text-anchor="middle" fill="#00d9a3" font-size="10">Beacon?</text>
-        <text x="370" y="466" text-anchor="middle" fill="#7f7fa0" font-size="9">conn≥2 &amp; zone≠defer</text>
-        <line x1="290" y1="456" x2="160" y2="456" stroke="#ffa94d" stroke-width="1" marker-end="url(#ar-a)"/>
-        <text x="228" y="448" text-anchor="middle" fill="#ffa94d" font-size="9">NO</text>
-        <rect x="55" y="436" width="105" height="40" rx="8" fill="#1a1200" stroke="#ffa94d" stroke-width="1.5"/>
-        <text x="108" y="454" text-anchor="middle" fill="#ffa94d" font-size="10">⏸ DEFERRED</text>
-        <text x="108" y="468" text-anchor="middle" fill="#7f7fa0" font-size="9">wait for beacon</text>
-        <path d="M108,436 Q108,390 270,385" fill="none" stroke="#ffa94d" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ar-a)"/>
-        <line x1="370" y1="486" x2="370" y2="520" stroke="#00d9a3" stroke-width="1" marker-end="url(#ar-g)"/>
-        <text x="378" y="507" fill="#00d9a3" font-size="9">YES</text>
-        <rect x="270" y="520" width="200" height="38" rx="8" fill="#041a10" stroke="#00d9a3" stroke-width="1.5"/>
-        <text x="370" y="538" text-anchor="middle" fill="#00d9a3" font-size="10">✓ FLUSH QUEUE</text>
-        <text x="370" y="551" text-anchor="middle" fill="#7f7fa0" font-size="9">deliver · clear Redis · digest if &gt;3</text>
-        <line x1="450" y1="456" x2="568" y2="456" stroke="#7f7fa0" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ar)"/>
-        <text x="507" y="448" text-anchor="middle" fill="#7f7fa0" font-size="9">critical_only zone</text>
-        <rect x="568" y="436" width="118" height="40" rx="8" fill="#1a1a26" stroke="#ff6b6b" stroke-width="1"/>
-        <text x="627" y="452" text-anchor="middle" fill="#ff6b6b" font-size="10">Filter: critical</text>
-        <text x="627" y="466" text-anchor="middle" fill="#7f7fa0" font-size="9">others deferred</text>
-        <text x="12" y="119" fill="#3d3d5a" font-size="9">①</text>
-        <text x="12" y="203" fill="#3d3d5a" font-size="9">②</text>
-        <text x="12" y="289" fill="#3d3d5a" font-size="9">③</text>
-        <text x="12" y="372" fill="#3d3d5a" font-size="9">④</text>
-        <text x="12" y="459" fill="#3d3d5a" font-size="9">⑤</text>
-        <text x="12" y="543" fill="#3d3d5a" font-size="9">⑥</text>
-      </svg>
-    </div>
-    <div style="margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-      <div class="panel" style="padding:16px;">
-        <div class="ptitle" style="color:var(--red);">⚡ Bypass Triggers</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);line-height:2.2;">
-          <div>otp · regex \b\d{4,6}\b</div><div>debit / credit / payment</div><div>security / breach / login</div><div>emergency · server alert</div>
-        </div>
-      </div>
-      <div class="panel" style="padding:16px;">
-        <div class="ptitle" style="color:var(--amber);">⏸ Deferral Conditions</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);line-height:2.2;">
-          <div>connectivity_score &lt; 2</div><div>zone_type = "defer"</div><div>critical_only + non-critical</div><div>TTL expired → dropped</div>
-        </div>
-      </div>
-      <div class="panel" style="padding:16px;">
-        <div class="ptitle" style="color:var(--green);">✓ Delivery Conditions</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);line-height:2.2;">
-          <div>connectivity_score ≥ 2 (3G+)</div><div>zone = always_deliver</div><div>critical_only + critical msg</div><div>digest if &gt;3 queued msgs</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="page" id="page-settings">
-    <div class="tc">
-      <div class="panel">
-        <div class="ptitle">API Config</div>
-        <div class="field"><label>Backend URL</label><input type="text" id="set-url" value="http://localhost:5000"></div>
-        <div class="field"><label>User ID</label><input type="text" id="set-uid" value="user_123"></div>
-        <button class="btn btnp" onclick="saveSettings()">Save</button>
-        <div class="divider"></div>
-        <div class="ptitle">TTL Map</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;line-height:2.2;color:var(--text-muted);">
-          <div style="display:flex;justify-content:space-between;"><span>otp</span><span style="color:var(--red)">300s</span></div>
-          <div style="display:flex;justify-content:space-between;"><span>transactional</span><span style="color:var(--amber)">3600s</span></div>
-          <div style="display:flex;justify-content:space-between;"><span>alert</span><span style="color:var(--blue)">1800s</span></div>
-          <div style="display:flex;justify-content:space-between;"><span>social</span><span style="color:var(--accent-bright)">86400s</span></div>
-          <div style="display:flex;justify-content:space-between;"><span>marketing</span><span style="color:var(--text-dim)">43200s</span></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="ptitle">Priority Weights</div>
-        <div style="font-family:'DM Mono',monospace;font-size:12px;line-height:2.8;color:var(--text-muted);">
-          <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-c">critical</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--red)">w=4</span></div>
-          <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-h">high</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--amber)">w=3</span></div>
-          <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-n">normal</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--blue)">w=2</span></div>
-          <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-l">low</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--text-dim)">w=1</span></div>
-        </div>
-        <div class="divider"></div>
-        <button class="btn btnd" style="width:100%;justify-content:center;" onclick="resetSession()">Reset Session</button>
-      </div>
-    </div>
-  </div>
-
+  <div class="sh"><span class="sh-t">Recent Activity</span><div class="sh-l"></div></div>
+  <div class="qlist" id="dash-act">
+    <div class="empty"><div class="empty-icon">◎</div><div class="empty-title">No activity yet</div><div class="empty-sub">Send a notification or run the Drive Simulator</div></div>
   </div>
 </div>
+
+<!-- INBOX -->
+<div class="page" id="page-inbox">
+  <div class="page-title">Inbox</div>
+  <div class="page-sub">All notifications routed through the pipeline</div>
+  <div class="tab-row">
+    <div class="tab active" id="tab-p" onclick="switchTab('p')">Pending <span class="tc-n" id="tcc-p">0</span></div>
+    <div class="tab" id="tab-d" onclick="switchTab('d')">Delivered <span class="tc-n" id="tcc-d">0</span></div>
+    <div class="tab" id="tab-b" onclick="switchTab('b')">Bypassed <span class="tc-n" id="tcc-b">0</span></div>
+  </div>
+  <div class="row" style="margin-bottom:16px;">
+    <button class="btn btn-s" onclick="renderInbox()">↻ Refresh</button>
+    <button class="btn btn-d" style="margin-left:auto;" onclick="clearInbox()">⌫ Clear</button>
+  </div>
+  <div class="qlist" id="inbox-c"></div>
+</div>
+
+<!-- DRIVE SIM -->
+<div class="page" id="page-drive">
+  <div class="page-title">Drive Simulator</div>
+  <div class="page-sub">Real-time geo-deferred notification demo along a simulated Bangalore route</div>
+  <div class="uber-dash">
+    <div class="uber-card">
+      <div class="uber-card-icon" style="background:var(--amber-s);">⏸</div>
+      <div><div class="uber-card-val amber" id="dr-p">0</div><div class="uber-card-lbl">Queued</div></div>
+    </div>
+    <div class="uber-card">
+      <div class="uber-card-icon" style="background:var(--green-s);">✓</div>
+      <div><div class="uber-card-val green" id="dr-d">0</div><div class="uber-card-lbl">Delivered</div></div>
+    </div>
+    <div class="uber-card">
+      <div class="uber-card-icon" style="background:var(--red-s);">⚡</div>
+      <div><div class="uber-card-val red" id="dr-b">0</div><div class="uber-card-lbl">Bypassed</div></div>
+    </div>
+    <div class="uber-card">
+      <div class="uber-card-icon" style="background:var(--s3);">📍</div>
+      <div><div class="uber-card-val" id="dr-z" style="font-size:15px;letter-spacing:0;">—</div><div class="uber-card-lbl">Current Zone</div></div>
+    </div>
+  </div>
+  <div class="uber-map-area">
+    <div>
+      <div class="route-panel">
+        <div class="route-header">
+          <div style="font-size:13px;font-weight:600;">Route · Bangalore</div>
+          <div class="sig-strip">
+            <div class="sigb" id="sb0"></div><div class="sigb" id="sb1"></div>
+            <div class="sigb" id="sb2"></div><div class="sigb" id="sb3"></div>
+            <span class="sig-lbl" id="sig-lbl">4G</span>
+          </div>
+        </div>
+        <div class="road-wrap">
+          <div class="road-track" id="tsegs"></div>
+          <div class="car-emoji" id="dr-car" style="left:20px;">🚗</div>
+        </div>
+        <div class="wps" id="wps"></div>
+      </div>
+      <div class="drive-status mono" id="dr-msg">Press Start — notifications queue in dead zones and flush when signal returns.</div>
+      <div class="nrain" id="nrain"><div class="nrl">notification stream</div></div>
+      <div class="drive-controls">
+        <button class="btn btn-p" id="dr-btn" onclick="toggleDrive()" style="min-width:130px;">▶ Start Drive</button>
+        <button class="btn btn-s" onclick="resetDrive()">↺ Reset</button>
+        <div class="speed-wrap">
+          Speed
+          <input type="range" min="1" max="5" value="3" id="dr-spd" oninput="document.getElementById('spd-lbl').textContent=this.value+'×'">
+          <span id="spd-lbl">3×</span>
+        </div>
+      </div>
+      <div class="sh"><span class="sh-t">Event Log</span><div class="sh-l"></div><button class="btn btn-s" style="padding:4px 10px;font-size:11px;" onclick="clearLog()">clear</button></div>
+      <div class="log" id="logstream">
+        <div class="le"><span class="lt">--:--</span><span class="linfo">Drive Simulator ready</span></div>
+      </div>
+    </div>
+    <div class="queue-side">
+      <div class="dqs">
+        <div class="dqh" style="color:var(--amber);">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v5l3 3"/><circle cx="8" cy="8" r="6"/></svg>
+          Pending <span class="dqcnt" id="dqpc" style="color:var(--amber);">0</span>
+        </div>
+        <div class="dql" id="dqpl"><div style="text-align:center;padding:8px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;">empty</div></div>
+      </div>
+      <div class="dqs">
+        <div class="dqh" style="color:var(--green);">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-8"/></svg>
+          Delivered <span class="dqcnt" id="dqdc" style="color:var(--green);">0</span>
+        </div>
+        <div class="dql" id="dqdl"><div style="text-align:center;padding:8px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;">none yet</div></div>
+      </div>
+      <div class="dqs">
+        <div class="dqh" style="color:var(--red);">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v5M8 12v1"/><circle cx="8" cy="8" r="6"/></svg>
+          Bypass <span class="dqcnt" id="dqbc" style="color:var(--red);">0</span>
+        </div>
+        <div class="dql" id="dqbl"><div style="text-align:center;padding:8px;font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;">none yet</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEND NOTIFY -->
+<div class="page" id="page-notify">
+  <div class="page-title">Send Notification</div>
+  <div class="page-sub">POST /api/notify — test the ingestion pipeline</div>
+  <div class="tc">
+    <div class="panel">
+      <div class="section-label">Presets</div>
+      <div class="presets" style="margin-bottom:18px;">
+        <button class="pbtn" onclick="setPreset('otp')">OTP</button>
+        <button class="pbtn" onclick="setPreset('payment')">Payment</button>
+        <button class="pbtn" onclick="setPreset('social')">Social</button>
+        <button class="pbtn" onclick="setPreset('spam')">Spam</button>
+        <button class="pbtn" onclick="setPreset('alert')">Alert</button>
+      </div>
+      <div class="field"><label>Recipient ID</label><input type="text" id="n-rcpt" value="user_123"></div>
+      <div class="field"><label>Sender</label><input type="text" id="n-sender" value="app_xyz"></div>
+      <div class="field"><label>Content</label><textarea id="n-content">Your OTP is 4821. Valid for 5 minutes. Do not share.</textarea></div>
+      <button class="btn btn-p" onclick="sendNotify()" style="width:100%;">Send to Pipeline</button>
+    </div>
+    <div class="panel">
+      <div class="section-label">Response</div>
+      <div id="n-result" class="rbox" style="margin-bottom:18px;">waiting...</div>
+      <div class="section-label">AI Analysis</div>
+      <div id="ana-empty" style="font-size:12px;color:var(--dim);font-family:'JetBrains Mono',monospace;">send a message to see analysis</div>
+      <div id="ana-prev" style="display:none;">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;" id="ana-tags"></div>
+        <div class="rbox" id="ana-det"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEACON -->
+<div class="page" id="page-beacon">
+  <div class="page-title">Beacon Emitter</div>
+  <div class="page-sub">POST /api/beacon — simulate client location ping</div>
+  <div class="tc">
+    <div class="panel">
+      <div class="field"><label>User ID</label><input type="text" id="b-uid" value="user_123"></div>
+      <div class="field"><label>Latitude</label><input type="number" id="b-lat" value="13.0827" step="0.0001"></div>
+      <div class="field"><label>Longitude</label><input type="number" id="b-lng" value="80.2707" step="0.0001"></div>
+      <div class="field">
+        <label>Connectivity — <span id="conn-lbl" style="color:var(--text)">4G/WiFi (3)</span></label>
+        <div class="cbar-wrap"><div class="cbar" id="cb0"></div><div class="cbar" id="cb1"></div><div class="cbar" id="cb2"></div><div class="cbar" id="cb3"></div></div>
+        <input type="range" min="0" max="3" value="3" id="b-conn" oninput="updConn()" style="accent-color:var(--red);width:100%;margin-top:6px;">
+      </div>
+      <div class="row" style="gap:8px;margin-top:4px;">
+        <button class="btn btn-g" onclick="sendBeacon()" style="flex:1;">◎ Emit Beacon</button>
+        <button class="btn btn-s" onclick="useGPS()">📍 GPS</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-label">Response</div>
+      <div id="b-result" class="rbox" style="margin-bottom:12px;">waiting...</div>
+      <div id="b-zone"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GEO ZONES -->
+<div class="page" id="page-geo">
+  <div class="page-title">Geo Zones</div>
+  <div class="page-sub">Click anywhere on the map to pin a location and assign a zone type</div>
+  <div class="geo-layout">
+    <div id="geo-map"></div>
+    <div>
+      <div class="sh" style="margin-bottom:12px;"><span class="sh-t">Active Zones</span><div class="sh-l"></div></div>
+      <div class="geo-zone-list" id="geo-cards">
+        <div class="empty"><div class="empty-icon">📍</div><div class="empty-title">Loading zones...</div></div>
+      </div>
+      <div style="margin-top:14px;padding:14px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);">
+        <div class="section-label">Zone Types</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.9;">
+          <div style="margin-bottom:8px;"><span class="zbadge za">always_deliver</span><div style="margin-top:4px;">Flush queue immediately on entry.</div></div>
+          <div style="margin-bottom:8px;"><span class="zbadge zd">defer</span><div style="margin-top:4px;">Hold all messages until zone exits.</div></div>
+          <div><span class="zbadge zc">critical_only</span><div style="margin-top:4px;">OTP / security messages only.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIC DIAGRAM -->
+<div class="page" id="page-logic">
+  <div class="page-title">Decision Logic</div>
+  <div class="page-sub">Defer / deliver pipeline — end to end</div>
+  <div class="diag-wrap">
+    <svg viewBox="0 0 740 620" width="100%" style="max-width:740px;font-family:'JetBrains Mono',monospace;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ar"   markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#666"/></marker>
+        <marker id="ar-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#27ae60"/></marker>
+        <marker id="ar-r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#c0392b"/></marker>
+        <marker id="ar-a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#e67e22"/></marker>
+      </defs>
+      <rect x="270" y="10" width="200" height="44" rx="22" fill="#141414" stroke="#444" stroke-width="1.5"/>
+      <text x="370" y="28" text-anchor="middle" fill="#f5f5f5" font-size="10" font-weight="500">INCOMING MESSAGE</text>
+      <text x="370" y="44" text-anchor="middle" fill="#666" font-size="9">POST /api/notify</text>
+      <line x1="370" y1="54" x2="370" y2="86" stroke="#444" stroke-width="1" marker-end="url(#ar)"/>
+      <polygon points="370,86 458,118 370,150 282,118" fill="#141414" stroke="#e67e22" stroke-width="1.5"/>
+      <text x="370" y="113" text-anchor="middle" fill="#e67e22" font-size="10">Spam?</text>
+      <text x="370" y="128" text-anchor="middle" fill="#666" font-size="9">conf &gt; 0.85</text>
+      <line x1="458" y1="118" x2="572" y2="118" stroke="#c0392b" stroke-width="1" marker-end="url(#ar-r)"/>
+      <text x="511" y="110" text-anchor="middle" fill="#c0392b" font-size="9">YES</text>
+      <rect x="572" y="98" width="118" height="40" rx="8" fill="#1a0505" stroke="#c0392b" stroke-width="1.5"/>
+      <text x="631" y="115" text-anchor="middle" fill="#c0392b" font-size="10">🚫 DROPPED</text>
+      <text x="631" y="130" text-anchor="middle" fill="#666" font-size="9">logged · discarded</text>
+      <line x1="370" y1="150" x2="370" y2="182" stroke="#444" stroke-width="1" marker-end="url(#ar)"/>
+      <text x="378" y="170" fill="#666" font-size="9">NO</text>
+      <rect x="255" y="182" width="230" height="44" rx="8" fill="#141414" stroke="#444" stroke-width="1.5"/>
+      <text x="370" y="200" text-anchor="middle" fill="#f5f5f5" font-size="10">AI Analysis</text>
+      <text x="370" y="216" text-anchor="middle" fill="#666" font-size="9">priority · category · bypass flag</text>
+      <line x1="370" y1="226" x2="370" y2="258" stroke="#444" stroke-width="1" marker-end="url(#ar)"/>
+      <polygon points="370,258 458,290 370,322 282,290" fill="#141414" stroke="#c0392b" stroke-width="1.5"/>
+      <text x="370" y="285" text-anchor="middle" fill="#c0392b" font-size="10">Bypass?</text>
+      <text x="370" y="300" text-anchor="middle" fill="#666" font-size="9">otp / alert / security</text>
+      <line x1="458" y1="290" x2="572" y2="290" stroke="#c0392b" stroke-width="1" marker-end="url(#ar-r)"/>
+      <text x="511" y="282" text-anchor="middle" fill="#c0392b" font-size="9">YES</text>
+      <rect x="572" y="270" width="118" height="40" rx="8" fill="#1a0505" stroke="#c0392b" stroke-width="1.5"/>
+      <text x="631" y="287" text-anchor="middle" fill="#c0392b" font-size="10">⚡ SEND NOW</text>
+      <text x="631" y="302" text-anchor="middle" fill="#666" font-size="9">skip queue entirely</text>
+      <line x1="370" y1="322" x2="370" y2="354" stroke="#444" stroke-width="1" marker-end="url(#ar)"/>
+      <text x="378" y="342" fill="#666" font-size="9">NO</text>
+      <rect x="255" y="354" width="230" height="44" rx="8" fill="#141414" stroke="#444" stroke-width="1.5"/>
+      <text x="370" y="372" text-anchor="middle" fill="#f5f5f5" font-size="10">Enqueue + TTL</text>
+      <text x="370" y="388" text-anchor="middle" fill="#666" font-size="9">Redis sorted set · weight×1B+ts</text>
+      <line x1="370" y1="398" x2="370" y2="430" stroke="#444" stroke-width="1" marker-end="url(#ar)"/>
+      <polygon points="370,430 458,462 370,494 282,462" fill="#141414" stroke="#27ae60" stroke-width="1.5"/>
+      <text x="370" y="457" text-anchor="middle" fill="#27ae60" font-size="10">Beacon?</text>
+      <text x="370" y="472" text-anchor="middle" fill="#666" font-size="9">conn≥2 &amp; zone≠defer</text>
+      <line x1="282" y1="462" x2="162" y2="462" stroke="#e67e22" stroke-width="1" marker-end="url(#ar-a)"/>
+      <text x="224" y="454" text-anchor="middle" fill="#e67e22" font-size="9">NO</text>
+      <rect x="52" y="442" width="110" height="40" rx="8" fill="#1a0d00" stroke="#e67e22" stroke-width="1.5"/>
+      <text x="107" y="459" text-anchor="middle" fill="#e67e22" font-size="10">⏸ DEFERRED</text>
+      <text x="107" y="474" text-anchor="middle" fill="#666" font-size="9">wait for beacon</text>
+      <path d="M107,442 Q107,390 255,385" fill="none" stroke="#e67e22" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ar-a)"/>
+      <line x1="370" y1="494" x2="370" y2="528" stroke="#27ae60" stroke-width="1" marker-end="url(#ar-g)"/>
+      <text x="378" y="515" fill="#27ae60" font-size="9">YES</text>
+      <rect x="255" y="528" width="230" height="44" rx="8" fill="#031008" stroke="#27ae60" stroke-width="1.5"/>
+      <text x="370" y="546" text-anchor="middle" fill="#27ae60" font-size="10">✓ FLUSH QUEUE</text>
+      <text x="370" y="562" text-anchor="middle" fill="#666" font-size="9">TTL check · zone filter · deliver</text>
+      <line x1="458" y1="462" x2="560" y2="462" stroke="#666" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ar)"/>
+      <text x="506" y="454" text-anchor="middle" fill="#666" font-size="9">critical_only</text>
+      <rect x="560" y="442" width="128" height="40" rx="8" fill="#141414" stroke="#c0392b" stroke-width="1"/>
+      <text x="624" y="459" text-anchor="middle" fill="#c0392b" font-size="10">Filter: critical only</text>
+      <text x="624" y="474" text-anchor="middle" fill="#666" font-size="9">others stay queued</text>
+    </svg>
+  </div>
+  <div class="tc3" style="margin-top:20px;">
+    <div class="panel"><div class="section-label" style="color:var(--red);">⚡ Bypass</div><div class="mono" style="font-size:11px;color:var(--muted);line-height:2.1;"><div>category = otp</div><div>category = alert</div><div>security / breach</div><div>skip queue entirely</div></div></div>
+    <div class="panel"><div class="section-label" style="color:var(--amber);">⏸ Deferral</div><div class="mono" style="font-size:11px;color:var(--muted);line-height:2.1;"><div>connectivity &lt; 2</div><div>zone = "defer"</div><div>critical_only + low-pri</div><div>TTL expired → drop</div></div></div>
+    <div class="panel"><div class="section-label" style="color:var(--green);">✓ Delivery</div><div class="mono" style="font-size:11px;color:var(--muted);line-height:2.1;"><div>connectivity ≥ 2 (3G+)</div><div>zone = always_deliver</div><div>critical_only + critical</div><div>digest if &gt;3 msgs</div></div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">Settings</div>
+  <div class="page-sub">API configuration and session management</div>
+  <div class="tc">
+    <div class="panel">
+      <div class="section-label">API Config</div>
+      <div class="field"><label>Backend URL</label><input type="text" id="set-url" value="http://localhost:8000"></div>
+      <div class="field"><label>User ID</label><input type="text" id="set-uid" value="user_123"></div>
+      <button class="btn btn-p" onclick="saveSettings()" style="width:100%;margin-bottom:16px;">Save</button>
+      <div class="divider"></div>
+      <div class="section-label">TTL Map</div>
+      <div class="mono" style="font-size:12px;line-height:2.4;color:var(--muted);">
+        <div style="display:flex;justify-content:space-between;"><span>otp</span><span style="color:var(--red)">300s</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>transactional</span><span style="color:var(--amber)">3600s</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>alert</span><span style="color:var(--blue)">1800s</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>social</span><span style="color:var(--green)">86400s</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>marketing</span><span style="color:var(--dim)">43200s</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-label">Priority Weights</div>
+      <div class="mono" style="font-size:12px;line-height:2.8;color:var(--muted);">
+        <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-c">critical</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--red)">w=4</span></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-h">high</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--amber)">w=3</span></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-n">normal</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--blue)">w=2</span></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span class="ptag p-l">low</span><span style="flex:1;height:1px;background:var(--border)"></span><span style="color:var(--dim)">w=1</span></div>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-d" style="width:100%;" onclick="resetSession()">↺ Reset Session</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
 <div id="toast"></div>
 <script src="script.js"></script>
 </body>
