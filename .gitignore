@@ -8,3 +8,4 @@ __pycache__/
 *.log
 # Ignore virtual environment
 venv/
+server/app/services/__pycache__/queue_service.cpython-313.pyc

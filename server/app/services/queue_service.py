@@ -17,6 +17,7 @@ TTL_MAP = {
     "marketing": 43200
 }
 
+
 async def enqueue(user_id: str, content: str, analysis: dict):
     now = int(time.time())
 
@@ -36,29 +37,4 @@ async def enqueue(user_id: str, content: str, analysis: dict):
         {json.dumps(message): score}
     )
 
-async def flush(user_id: str, zone_type: str) -> list:
-    raw_messages = await r.zrange(f"queue:{user_id}", 0, -1)
-    now = int(time.time())
-    expired, to_deliver, to_keep = [], [], []
-
-    for raw in raw_messages:
-        try:
-            m = json.loads(raw)
-            age = now - m.get("enqueued_at", now)
-            if age > m.get("ttl", 86400):
-                expired.append(raw)
-            elif zone_type == "critical_only" and m.get("priority") != "critical":
-                to_keep.append(raw)
-            else:
-                to_deliver.append((raw, m))
-        except Exception:
-            expired.append(raw)
-
-    for raw in expired:
-        await r.zrem(f"queue:{user_id}", raw)
-    for raw, _ in to_deliver:
-        await r.zrem(f"queue:{user_id}", raw)
-
-    delivered = [m for _, m in to_deliver]
-    print(f"[DELIVERY] user={user_id} zone={zone_type} delivered={len(delivered)} kept={len(to_keep)} expired={len(expired)}")
-    return delivered
+    print(f"[QUEUE] Enqueued message for {user_id} with priority {analysis['priority']}")

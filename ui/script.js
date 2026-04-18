@@ -335,17 +335,65 @@ function showZone(label, type) {
 }
 
 function useGPS() {
-  if (!navigator.geolocation) { toast('Geolocation unavailable','err'); return; }
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(
-    p => {
-      document.getElementById('b-lat').value = p.coords.latitude.toFixed(4);
-      document.getElementById('b-lng').value = p.coords.longitude.toFixed(4);
-      toast('✓ GPS updated');
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      document.getElementById("b-lat").value = lat;
+      document.getElementById("b-lng").value = lng;
+
+      toast("GPS location updated");
     },
-    () => toast('Location denied','err')
+    (err) => {
+      alert("Failed to get location");
+      console.error(err);
+    }
   );
 }
+// Optional: continuous tracking
+let watchId = null;
 
+function startTracking() {
+  if (!navigator.geolocation) return;
+
+  watchId = navigator.geolocation.watchPosition((pos) => {
+    sendBeaconAuto(pos.coords.latitude, pos.coords.longitude);
+  });
+
+  toast("Live tracking started");
+}
+
+function stopTracking() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    toast("Tracking stopped");
+  }
+}
+
+function sendBeaconAuto(lat, lng) {
+  fetch("http://localhost:8000/api/beacon/", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      user_id: document.getElementById("b-uid").value,
+      lat: lat,
+      lng: lng,
+      connectivity_score: parseInt(document.getElementById("b-conn").value)
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("[AUTO BEACON]", data);
+  })
+  .catch(err => console.error(err));
+}
 // ─── Geo Zones ────────────────────────────────────────────────────────────────
 async function loadGeo() {
   try {
