@@ -5,3 +5,5 @@ redis
 asyncpg
 sqlalchemy
 httpx
+joblib
+scikit-learn==1.6.1
